@@ -2,26 +2,38 @@
 import socket
 import messages
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # IPv4 , # tcp
-s.connect(("192.168.1.6", 8989))
-sendMsg1 = messages.requestPlaylistChannel1
-s.sendall(sendMsg1.encode('ascii'))
+clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # IPv4 , # tcp
+HOST = "192.168.1.6"
+PORT = 8989
+clientSocket.connect((HOST, PORT))
+requestMessagge = messages.requestPlaylistChannel1
+clientSocket.sendall(requestMessagge.encode('ascii'))
 
-revcMsg = s.recv(1024)
-print(revcMsg.decode('ascii'))
+# reciev playlist
+rcvPlaylistMessage = clientSocket.recv(1024)
+print(rcvPlaylistMessage.decode('ascii'))
 
-revcMsg = s.recv(1024)
-print(revcMsg.decode('ascii'))
+# recv msg that channel is playing ro not
+channelStatus = clientSocket.recv(1024)
+channelStatus = channelStatus.decode('ascii')
+if channelStatus == messages.channel1IsNotPlaying:
+    print(channelStatus)
+elif channelStatus == messages.channel1IsPlaying:
+    print(channelStatus)
+    ackOrNack = input(messages.wantToWatch)
+    clientSocket.sendall(ackOrNack.encode('ascii'))
 
-s.close()
+clientSocket.close()
 
 
 
-#=======================================================================
+
+#UDP
+
 
 # RECEIVER
-# Multicast UDP image recieve
 
+print("start udp ...")
 import socket
 import struct
 
